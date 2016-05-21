@@ -1,0 +1,11 @@
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x86\Release\NoiseAnalysis.exe.config
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\obj\x86\Release\NoiseAnalysis.csprojResolveAssemblyReference.cache
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x86\Release\NoiseAnalysis.exe
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x86\Release\NoiseAnalysis.pdb
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x86\Release\gdalconst_csharp.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x86\Release\gdal_csharp.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x86\Release\GeoAPI.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x86\Release\ogr_csharp.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x86\Release\osr_csharp.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\obj\x86\Release\NoiseAnalysis.exe
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\obj\x86\Release\NoiseAnalysis.pdb

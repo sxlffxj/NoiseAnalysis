@@ -1,0 +1,8 @@
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x64\Release\NoiseAnalysis.exe
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x64\Release\NoiseAnalysis.pdb
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x64\Release\gdalconst_csharp.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x64\Release\gdal_csharp.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x64\Release\ogr_csharp.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\x64\Release\osr_csharp.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\obj\x64\Release\NoiseAnalysis.exe
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\obj\x64\Release\NoiseAnalysis.pdb

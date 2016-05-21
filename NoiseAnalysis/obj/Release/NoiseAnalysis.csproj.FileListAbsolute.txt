@@ -1,0 +1,17 @@
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\NoiseAnalysis.pdb
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\gdalconst_csharp.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\gdal_csharp.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\ogr_csharp.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\osr_csharp.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\obj\Release\NoiseAnalysis.pdb
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\obj\Release\NoiseAnalysis.csprojResolveAssemblyReference.cache
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\NoiseAnalysis.exe.config
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\NoiseAnalysis.exe
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\obj\Release\NoiseAnalysis.exe
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\GeoAPI.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\NetTopologySuite.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\NetTopologySuite.IO.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\NetTopologySuite.IO.GeoTools.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\NetTopologySuite.IO.ShapeFile.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\NetTopologySuite.IO.ShapeFile.Extended.dll
+E:\WorkSpace\3DWorks\NoiseAnalysis\NoiseAnalysis\bin\Release\DotSpatial.Projections.dll
