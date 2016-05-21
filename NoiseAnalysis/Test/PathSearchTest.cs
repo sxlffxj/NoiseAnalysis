@@ -11,10 +11,12 @@ namespace NoiseAnalysis.Test
 {
     class PathSearchTest
     {
-        string rPath = "E:\\test\\workspace\\temp\\receivePoint.shp";
-        string sPath = "E:\\test\\workspace\\temp\\staticPartition.shp";
-        string bPath = "F:\\arcgis\\test\\building.shp";
-        string toPath = "E:\\test\\workspace\\temp\\direct.shp";
+
+
+        string rPath = Environment.CurrentDirectory + "\\temp\\receivePoint.shp";
+        string sPath = Environment.CurrentDirectory + "\\temp\\staticPartition.shp";
+        string bPath = Environment.CurrentDirectory + "\\DataSource\\building.shp";
+        string toPath = Environment.CurrentDirectory + "\\temp\\direct.shp";
 
         PathSearch bean = new PathSearch();
 
