@@ -16,7 +16,7 @@ namespace NoiseAnalysis.Test
         string rPath = Environment.CurrentDirectory + "\\temp\\receivePoint.shp";
         string sPath = Environment.CurrentDirectory + "\\temp\\staticPartition.shp";
         string bPath = Environment.CurrentDirectory + "\\DataSource\\building.shp";
-        string toPath = Environment.CurrentDirectory + "\\temp\\direct.shp";
+        string toPath = Environment.CurrentDirectory + "\\temp\\diffraction.shp";
 
         PathSearch bean = new PathSearch();
 
@@ -45,6 +45,8 @@ namespace NoiseAnalysis.Test
             List<Geometry> geos = new List<Geometry>();
             while ((rFeature = rLayer.GetNextFeature()) != null)
             {
+               // if (rFeature.GetFID()>5400)
+               // {
                 Geometry point = rFeature.GetGeometryRef();
                // bean.direct(bLayer, sLayer, point);
               //  Console.WriteLine(rFeature.GetFID() + ":" + bean.direct(bLayer, rLayer, point));
@@ -54,10 +56,13 @@ namespace NoiseAnalysis.Test
 
                 geos.AddRange(bean.direct(bLayer, sLayer, point,500));
                 Console.WriteLine(rFeature.GetFID() + ":" + rLayer.GetFeatureCount(0) + ":" + DateTime.Now);
-             //   i++;
-                //    if(i==5){
- //break;
-                //    }
+
+          //  }
+
+                i++;
+                    if(i==1){
+ break;
+                    }
                
 
             }
@@ -72,7 +77,7 @@ namespace NoiseAnalysis.Test
 
             // 创建数据源  
             DataSource oDS = oDriver.CreateDataSource(toPath, null);
-            Layer toLayer = oDS.CreateLayer("POINT", sLayer.GetSpatialRef(), wkbGeometryType.wkbLineString, null);
+            Layer toLayer = oDS.CreateLayer("direct", sLayer.GetSpatialRef(), wkbGeometryType.wkbLineString, null);
 
             FeatureDefn oDefn = toLayer.GetLayerDefn();
            foreach(Geometry geom in geos)
