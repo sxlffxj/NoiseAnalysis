@@ -15,7 +15,7 @@ namespace NoiseAnalysis.Test
 
         string rPath = Environment.CurrentDirectory + "\\temp\\receivePoint.shp";
         string sPath = Environment.CurrentDirectory + "\\temp\\staticPartition.shp";
-        string bPath = Environment.CurrentDirectory + "\\DataSource\\building.shp";
+        string bPath = Environment.CurrentDirectory + "\\temp\\union.shp";
         string toPath = Environment.CurrentDirectory + "\\temp\\diffraction.shp";
 
         PathSearch bean = new PathSearch();
@@ -23,6 +23,8 @@ namespace NoiseAnalysis.Test
 
         public void directTest()
         {
+           
+          
             Gdal.AllRegister();
             Gdal.SetConfigOption("GDAL_FILENAME_IS_UTF8", "YES");
             Gdal.SetConfigOption("SHAPE_ENCODING", "");
@@ -43,30 +45,39 @@ namespace NoiseAnalysis.Test
 
             int i = 0;
             List<Geometry> geos = new List<Geometry>();
+            try
+            {
+
             while ((rFeature = rLayer.GetNextFeature()) != null)
             {
-               // if (rFeature.GetFID()>5400)
-               // {
+                if (rFeature.GetFID()>740)
+                {
                 Geometry point = rFeature.GetGeometryRef();
                // bean.direct(bLayer, sLayer, point);
-              //  Console.WriteLine(rFeature.GetFID() + ":" + bean.direct(bLayer, rLayer, point));
+             //  Console.WriteLine(rFeature.GetFID() + ":" + bean.direct(bLayer, rLayer, point));
               
 
 
 
                 geos.AddRange(bean.direct(bLayer, sLayer, point,500));
+                
                 Console.WriteLine(rFeature.GetFID() + ":" + rLayer.GetFeatureCount(0) + ":" + DateTime.Now);
-
-          //  }
-
-                i++;
-                    if(i==1){
- break;
-                    }
-               
 
             }
 
+              //  i++;
+              //      if(i==1){
+// break;
+              //      }
+               
+
+            }
+            }
+
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
 
 
 
@@ -76,7 +87,20 @@ namespace NoiseAnalysis.Test
 
 
             // 创建数据源  
-            DataSource oDS = oDriver.CreateDataSource(toPath, null);
+
+         
+
+            DataSource oDS;
+            if (Ogr.Open(toPath, 0) != null)
+            {
+                oDS = Ogr.Open(toPath, 1);
+                oDS.DeleteLayer(0);
+            }
+            else
+            {
+                oDS = oDriver.CreateDataSource(toPath, null);
+            }
+
             Layer toLayer = oDS.CreateLayer("direct", sLayer.GetSpatialRef(), wkbGeometryType.wkbLineString, null);
 
             FeatureDefn oDefn = toLayer.GetLayerDefn();
@@ -95,23 +119,7 @@ namespace NoiseAnalysis.Test
 
             oDS.SyncToDisk();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+         
 
         }
 

@@ -31,10 +31,10 @@ namespace NoiseAnalysis.ComputeTools
         }
 
 
-    public struct map
+        public struct map
         {
-         public double width;
-         public Geometry geo;
+            public double width;
+            public Geometry geo;
         }
 
 
@@ -75,11 +75,12 @@ namespace NoiseAnalysis.ComputeTools
             Geometry highgeotemp = null;
             double width = 0;
 
-            Geometry crossLine = null;
+
             map st = new map();
+            st.width = 0;
+            st.geo = null;
 
 
-          
 
 
 
@@ -94,13 +95,6 @@ namespace NoiseAnalysis.ComputeTools
                 bool isIntersect = false;
                 buildings.ResetReading();
 
-
-
-
-
-
-
-               
                 while ((bFeature = buildings.GetNextFeature()) != null)
                 {
                     //判断判断传播线是否与建筑物相交，如果相交，则进行绕射计算
@@ -108,28 +102,34 @@ namespace NoiseAnalysis.ComputeTools
                     {
                         // 计算绕射
                         isIntersect = true;
-                        if (hightemp < bFeature.GetFieldAsDouble("B_HI"))
-                        {
-                            hightemp = bFeature.GetFieldAsDouble("B_HI");
+         
+
+                        if (hightemp < bFeature.GetFieldAsDouble("HEIGHT_G"))
+                       {
+                           hightemp = bFeature.GetFieldAsDouble("HEIGHT_G");
                             highgeotemp = bFeature.GetGeometryRef();
                         }
-           
-                        //获取最大宽度和对应的宽度线
-                      st=  getWidth(bFeature.GetGeometryRef(), line, width, crossLine);
+
+                       // 获取最大宽度和对应的宽度线
+                        st = getWidth(bFeature.GetGeometryRef(), line, st);
+
                     }
                 }
 
                 if (!isIntersect)
                 {
-                   // geos.Add(line);
+                    // geos.Add(line);
                     // length += line.Length();
                 }
                 else
                 {
                     //计算绕射
+
                     geos.AddRange(getCrossLine(st.geo, line, sourcePoint, receivePoint));
+
+
                 }
-               
+
 
             }
 
@@ -140,11 +140,13 @@ namespace NoiseAnalysis.ComputeTools
         }
 
 
-        public map getWidth(Geometry building, Geometry line,double width,Geometry crossLine)
+        public map getWidth(Geometry building, Geometry line, map mapx)
         {
             Geometry buildingring = building.GetGeometryRef(0);
-            Geometry intersectLine = null;
             map st = new map();
+        
+            Geometry intersectLine = null;
+         
             for (int i = 0; i < buildingring.GetPointCount() - 1; i++)
             {
                 intersectLine = new Geometry(wkbGeometryType.wkbLineString);
@@ -152,54 +154,31 @@ namespace NoiseAnalysis.ComputeTools
                 intersectLine.AddPoint(buildingring.GetX(i), buildingring.GetY(i), buildingring.GetZ(i));
                 intersectLine.AddPoint(buildingring.GetX(i + 1), buildingring.GetY(i + 1), buildingring.GetZ(i + 1));
 
-                if (intersectLine.Intersect(line) && width < intersectLine.Length())
+                if (intersectLine.Intersect(line) && mapx.width < intersectLine.Length())
                 {
                     st.width = intersectLine.Length();
-                   
+
                     st.geo = intersectLine;
                 }
             }
-            return st;
+      
+            if (st.geo != null)
+            {
+                return st;
+            }
+            else
+            {
+                return mapx;
+            }
+
         }
-
-        public Geometry getDirect(Geometry building, Geometry line, Geometry sourcePoint, Geometry receivePoint,double high)
-        {
-            Geometry crossLine = line.Intersection(building);
-
-            Geometry up = new Geometry(wkbGeometryType.wkbLineString);
-
-
-
-
-
-
-
-
-
-
-
-
-            return up;
-        }
-
-
-
-
-
-
-
-
-
 
 
         public List<Geometry> getCrossLine(Geometry crossLine, Geometry line, Geometry sourcePoint, Geometry receivePoint)
         {
-
-            String a = "";
             List<Geometry> geos = new List<Geometry>();
             geos.Add(line);
 
-       
 
             Geometry right = new Geometry(wkbGeometryType.wkbLineString);
 
@@ -208,7 +187,7 @@ namespace NoiseAnalysis.ComputeTools
             right.AddPoint(receivePoint.GetX(0), receivePoint.GetY(0), receivePoint.GetZ(0));
             geos.Add(right);
 
-        
+
 
             Geometry left = new Geometry(wkbGeometryType.wkbLineString);
             left.AddPoint(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0));
@@ -222,26 +201,12 @@ namespace NoiseAnalysis.ComputeTools
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        public List<Geometry> diffraction(Feature highf,Feature widthf,double width, Geometry sourcePoint, Geometry receivePoint, Geometry line, double distance)
+        public List<Geometry> diffraction(Feature highf, Feature widthf, double width, Geometry sourcePoint, Geometry receivePoint, Geometry line, double distance)
         {
 
             List<Geometry> geos = new List<Geometry>();
 
-            double high=highf.GetFieldAsDouble("B_HI");
+            double high = highf.GetFieldAsDouble("B_HI");
 
             Geometry cross = highf.GetGeometryRef();
             cross.CloseRings();
@@ -264,7 +229,7 @@ namespace NoiseAnalysis.ComputeTools
 
 
             Geometry left = new Geometry(wkbGeometryType.wkbLineString);
-           
+
             left.AddPoint(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0));
 
 
@@ -282,21 +247,15 @@ namespace NoiseAnalysis.ComputeTools
 
 
 
-          //  length = Math.Sqrt(sourcePoint.Distance(highgeotemp) * sourcePoint.Distance(highgeotemp) + (hightemp - sourcePoint.GetZ(0)) * (hightemp - sourcePoint.GetZ(0)))
-           //     + Math.Sqrt(receivePoint.Distance(highgeotemp) * receivePoint.Distance(highgeotemp) + (hightemp - receivePoint.GetZ(0)) * (hightemp - receivePoint.GetZ(0)))
-           //     + line.Length() - sourcePoint.Distance(highgeotemp) - receivePoint.Distance(highgeotemp);
+            //  length = Math.Sqrt(sourcePoint.Distance(highgeotemp) * sourcePoint.Distance(highgeotemp) + (hightemp - sourcePoint.GetZ(0)) * (hightemp - sourcePoint.GetZ(0)))
+            //     + Math.Sqrt(receivePoint.Distance(highgeotemp) * receivePoint.Distance(highgeotemp) + (hightemp - receivePoint.GetZ(0)) * (hightemp - receivePoint.GetZ(0)))
+            //     + line.Length() - sourcePoint.Distance(highgeotemp) - receivePoint.Distance(highgeotemp);
 
 
             return geos;
 
             // return length;
         }
-
-
-
-
-
-
 
 
     }

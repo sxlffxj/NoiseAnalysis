@@ -11,8 +11,8 @@ namespace NoiseAnalysis.Test
 {
     class ProjectionToolsTest
     {
-        string fromPath = "F:\\arcgis\\test\\buildingw.shp";
-        string toPath = "E:\\test\\workspace\\temp\\projection.shp";
+        string fromPath = Environment.CurrentDirectory + "\\DataSource\\buildingw.shp";
+        string toPath = Environment.CurrentDirectory + "\\temp\\project.shp";
         ProjectionTools bean = new ProjectionTools();
         public const String PROJECTION = "PROJCS[\"WGS_1984_World_Mercator\","
 + "GEOGCS[\"GCS_WGS_1984\""
@@ -21,7 +21,7 @@ namespace NoiseAnalysis.Test
 + "PROJECTION[\"Mercator\"],PARAMETER[\"False_Easting\",0.0],"
 + "PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",0.0]"
 + ",PARAMETER[\"Standard_Parallel_1\",0.0],UNIT[\"Meter\",1.0],AUTHORITY[\"EPSG\",3395]]";
-        
+
         public void testProjectionConvert()
         {
 
@@ -39,13 +39,22 @@ namespace NoiseAnalysis.Test
 
 
 
-            OSGeo.OSR.SpatialReference projection = new OSGeo.OSR.SpatialReference(PROJECTION);
-            // 创建数据源  
-            DataSource oDS = oDriver.CreateDataSource(toPath, null);
+            OSGeo.OSR.SpatialReference projection = new OSGeo.OSR.SpatialReference("");
+            projection.ImportFromEPSG(3395);
+      
+            DataSource oDS;
+            if (Ogr.Open(toPath, 0) != null)
+            {
+                oDS = Ogr.Open(toPath, 1);
+                oDS.DeleteLayer(0);
+           }else{
+                oDS = oDriver.CreateDataSource(toPath, null);
+           }
+           
+          
+
+
             Layer toLayer = oDS.CreateLayer("POINT", projection, oLayer.GetGeomType(), null);
-
-       
-
 
             Random ran = new Random();
             Feature oFeature = null;
@@ -58,36 +67,25 @@ namespace NoiseAnalysis.Test
             FieldDefn oFieldName = new FieldDefn("PWLs", FieldType.OFTReal);
             toLayer.CreateField(oFieldName, 1);
 
+            OSGeo.OSR.CoordinateTransformation coordTrans = new OSGeo.OSR.CoordinateTransformation(oLayer.GetSpatialRef(), projection);
+
+
+
             while ((oFeature = oLayer.GetNextFeature()) != null)
-            {
-                //read current feature
-
+            {   
                 lines = oFeature.GetGeometryRef();
+                lines.Transform(coordTrans);
 
-                    Feature feature = new Feature(oDefn);
+                Feature feature = new Feature(oDefn);     
+                feature.SetGeometry(lines);
+                feature.SetField(0, 4.0);
+                feature.SetField(1, ran.Next(40, 120));
+                toLayer.CreateFeature(feature);
 
-                    feature.SetGeometry(bean.projectionConvert(lines, projection));
-                    feature.SetField(0, 4.0);
-                    feature.SetField(1, ran.Next(40, 120));
-                    toLayer.CreateFeature(feature);
-           
             }
 
             oDS.SyncToDisk();
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     }

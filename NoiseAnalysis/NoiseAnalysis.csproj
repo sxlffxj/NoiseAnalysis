@@ -116,6 +116,7 @@
     <Compile Include="Test\ProjectionTest.cs" />
     <Compile Include="Test\ProjectionToolsTest.cs" />
     <Compile Include="Test\test.cs" />
+    <Compile Include="Test\UnionTest.cs" />
     <Compile Include="ThreadPoolConfig\GetTreadPool.cs" />
   </ItemGroup>
   <ItemGroup>
