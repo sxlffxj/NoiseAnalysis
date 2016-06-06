@@ -16,6 +16,7 @@ namespace NoiseAnalysis.Test
         string rPath = Environment.CurrentDirectory + "\\temp\\receivePoint.shp";
         string sPath = Environment.CurrentDirectory + "\\temp\\staticPartition.shp";
         string bPath = Environment.CurrentDirectory + "\\temp\\union.shp";
+       // string bPath = Environment.CurrentDirectory + "\\DataSource\\building.shp";
         string toPath = Environment.CurrentDirectory + "\\temp\\diffraction.shp";
 
         PathSearch bean = new PathSearch();
@@ -45,13 +46,13 @@ namespace NoiseAnalysis.Test
 
             int i = 0;
             List<Geometry> geos = new List<Geometry>();
-            try
-            {
+          //  try
+           // {
 
             while ((rFeature = rLayer.GetNextFeature()) != null)
             {
-                if (rFeature.GetFID()>740)
-                {
+               // if (rFeature.GetFID()>740)
+              //  {
                 Geometry point = rFeature.GetGeometryRef();
                // bean.direct(bLayer, sLayer, point);
              //  Console.WriteLine(rFeature.GetFID() + ":" + bean.direct(bLayer, rLayer, point));
@@ -60,24 +61,24 @@ namespace NoiseAnalysis.Test
 
 
                 geos.AddRange(bean.direct(bLayer, sLayer, point,500));
-                
-                Console.WriteLine(rFeature.GetFID() + ":" + rLayer.GetFeatureCount(0) + ":" + DateTime.Now);
 
-            }
+                Console.WriteLine(rFeature.GetFID() + ":" + rLayer.GetFeatureCount(0) + ":" + DateTime.Now + ":" + DateTime.Now.Millisecond);
+
+         //   }
 
               //  i++;
-              //      if(i==1){
+                  //  if(i==100){
 // break;
-              //      }
+               //     }
                
 
             }
-            }
+          //  }
 
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            //catch (Exception e)
+           // {
+               // Console.WriteLine(e.Message);
+           // }
 
 
 
@@ -103,14 +104,18 @@ namespace NoiseAnalysis.Test
 
             Layer toLayer = oDS.CreateLayer("direct", sLayer.GetSpatialRef(), wkbGeometryType.wkbLineString, null);
 
+       
+
+
             FeatureDefn oDefn = toLayer.GetLayerDefn();
+    
            foreach(Geometry geom in geos)
             {
                 //read current feature
 
 
                 Feature feature = new Feature(oDefn);
-
+        
                 feature.SetGeometry(geom);
 
                 toLayer.CreateFeature(feature);

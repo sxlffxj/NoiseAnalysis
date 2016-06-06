@@ -46,7 +46,7 @@ namespace NoiseAnalysis.Test
             }
             bLayer.ResetReading();
 
-            // List<Geometry> geos = new List<Geometry>();
+
             Dictionary<double, geounion> geos = new Dictionary<double, geounion>();
             geounion geo;
 
@@ -59,7 +59,7 @@ namespace NoiseAnalysis.Test
                     geo.geo = bLayer.GetFeature(i).GetGeometryRef();
                     geo.high = 0;
                     geo.key = bLayer.GetFeature(i).GetFID();
-                   
+
                     try
                     {
                         bLayer.SetSpatialFilter(geo.geo.Buffer(0.5, 30));
@@ -69,46 +69,43 @@ namespace NoiseAnalysis.Test
                             geos.Remove(geo.key);
                         }
                         geos.Add(geo.key, geo);
-
-                        // bLayer.ResetReading();
-
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(e.Message);
                     }
 
-                    Console.WriteLine(i + ":" + count + "      " + DateTime.Now + ":" + DateTime.Now.Millisecond);
+                    //  Console.WriteLine(i + ":" + count + "      " + DateTime.Now + ":" + DateTime.Now.Millisecond);
 
                 }
             }
-                OSGeo.OGR.Driver oDriver = Ogr.GetDriverByName("ESRI Shapefile");
-                DataSource oDS;
-                if (Ogr.Open(toPath, 0) != null)
-                {
-                    oDS = Ogr.Open(toPath, 1);
-                    oDS.DeleteLayer(0);
-                }
-                else
-                {
-                    oDS = oDriver.CreateDataSource(toPath, null);
-                }
-                // 创建数据源  
-                Layer toLayer = oDS.CreateLayer("direct", bLayer.GetSpatialRef(), wkbGeometryType.wkbPolygon, null);
-                FieldDefn oFieldID = new FieldDefn("HEIGHT_G", FieldType.OFTReal);
-                toLayer.CreateField(oFieldID, 1);
+            OSGeo.OGR.Driver oDriver = Ogr.GetDriverByName("ESRI Shapefile");
+            DataSource oDS;
+            if (Ogr.Open(toPath, 0) != null)
+            {
+                oDS = Ogr.Open(toPath, 1);
+                oDS.DeleteLayer(0);
+            }
+            else
+            {
+                oDS = oDriver.CreateDataSource(toPath, null);
+            }
+            // 创建数据源  
+            Layer toLayer = oDS.CreateLayer("direct", bLayer.GetSpatialRef(), wkbGeometryType.wkbPolygon, null);
+            FieldDefn oFieldID = new FieldDefn("HEIGHT_G", FieldType.OFTReal);
+            toLayer.CreateField(oFieldID, 1);
 
-                FeatureDefn oDefn = toLayer.GetLayerDefn();
-                foreach (double key in geos.Keys)
-                {
-                    //read current feature
-                    Feature feature = new Feature(oDefn);
-                    feature.SetField(0, geos[key].high);
-                    feature.SetGeometry(geos[key].geo);
-                    toLayer.CreateFeature(feature);
-                }
-                oDS.SyncToDisk();
-           
+            FeatureDefn oDefn = toLayer.GetLayerDefn();
+            foreach (double key in geos.Keys)
+            {
+                //read current feature
+                Feature feature = new Feature(oDefn);
+                feature.SetField(0, geos[key].high);
+                feature.SetGeometry(geos[key].geo);
+                toLayer.CreateFeature(feature);
+            }
+            oDS.SyncToDisk();
+
         }
 
         public geounion getTouch(Layer bLayer, geounion geo)
@@ -117,26 +114,20 @@ namespace NoiseAnalysis.Test
             {
                 Feature bfeature = null;
                 while ((bfeature = bLayer.GetNextFeature()) != null)
-               // for (int i = 0; i < bLayer.GetFeatureCount(0);i++ )
                 {
                     if (bfeature.GetFieldAsInteger("idUnion") != 1)
                     {
-                       // bfeature = bLayer.GetFeature(i);
-                        // while (isIngeo(bLayer, geo.geo))
-                        //  {
                         geo.geo = geo.geo.Union(bfeature.GetGeometryRef());
                         geo.key = bfeature.GetFID();
                         if (geo.high < bfeature.GetFieldAsDouble("B_HI"))
                         {
                             geo.high = bfeature.GetFieldAsDouble("B_HI");
-
                         }
                         bfeature.SetField("idUnion", 1);
                         bLayer.SetFeature(bfeature);
                         bLayer.SetSpatialFilter(geo.geo.Buffer(0.5, 30));
                         Console.WriteLine(bLayer.GetFeatureCount(0));
-                    }                 
-                    // }
+                    }
                 }
             }
 
@@ -152,12 +143,12 @@ namespace NoiseAnalysis.Test
             bool isIn = false;
             layer.ResetReading();
             Feature bfeature = null;
-            while ((bfeature = layer.GetNextFeature())!=null)
+            while ((bfeature = layer.GetNextFeature()) != null)
             {
                 if (bfeature.GetFieldAsInteger("idUnion") == 0)
                 {
-                   isIn = true;
-                   break;
+                    isIn = true;
+                    break;
                 }
             }
             return isIn;

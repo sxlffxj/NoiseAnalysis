@@ -13,7 +13,7 @@ namespace NoiseMapTest
         static void Main(string[] args)
         {
             gdaltest g = new gdaltest();
-            g.crossTest();
+            g.dxftest();
 
             Console.WriteLine(DateTime.Now);
             Console.WriteLine("ok");

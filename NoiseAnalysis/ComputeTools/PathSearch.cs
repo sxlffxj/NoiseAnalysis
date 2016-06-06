@@ -7,6 +7,8 @@ using OSGeo.OGR;
 using OSGeo.OSR;
 using NoiseAnalysis.SpatialTools;
 using System.Xml;
+using NoiseAnalysis.Algorithm;
+using GeoAPI.Geometries;
 
 
 namespace NoiseAnalysis.ComputeTools
@@ -31,10 +33,12 @@ namespace NoiseAnalysis.ComputeTools
         }
 
 
-        public struct map
+        public struct topBuilding
         {
             public double width;
-            public Geometry geo;
+            public double high;
+            public Geometry topwidth;
+            public Geometry tophigh;
         }
 
 
@@ -62,7 +66,6 @@ namespace NoiseAnalysis.ComputeTools
             sources.SetSpatialFilter(receiveBuffer);
 
             Feature sFeature = null;
-            Feature bFeature = null;
             Geometry sourcePoint = null;
             Geometry line = null;
             Queue<Feature> diffbuildings = new Queue<Feature>();
@@ -70,67 +73,34 @@ namespace NoiseAnalysis.ComputeTools
 
             List<Geometry> geos = new List<Geometry>();
 
-            double hightemp = 0;
-
-            Geometry highgeotemp = null;
-            double width = 0;
-
-
-            map st = new map();
-            st.width = 0;
-            st.geo = null;
-
-
 
 
 
             while ((sFeature = sources.GetNextFeature()) != null)
             {
-
-
                 sourcePoint = sFeature.GetGeometryRef();
                 line = GeometryCreate.createLineString3D(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0), receivePoint.GetX(0), receivePoint.GetY(0), receivePoint.GetZ(0));
                 buildings.SetSpatialFilter(line);
-                // Console.WriteLine(buildings.GetFeatureCount(0));
-                bool isIntersect = false;
-                buildings.ResetReading();
 
-                while ((bFeature = buildings.GetNextFeature()) != null)
+
+
+                List<Geometry> a = getWidth(buildings, sourcePoint, receivePoint, line);
+
+           
+               if (a!=null)
+               // if (buildings.GetFeaturesRead()>0)
                 {
-                    //判断判断传播线是否与建筑物相交，如果相交，则进行绕射计算
-                    if (bFeature.GetGeometryRef().Intersect(line))
-                    {
-                        // 计算绕射
-                        isIntersect = true;
-         
-
-                        if (hightemp < bFeature.GetFieldAsDouble("HEIGHT_G"))
-                       {
-                           hightemp = bFeature.GetFieldAsDouble("HEIGHT_G");
-                            highgeotemp = bFeature.GetGeometryRef();
-                        }
-
-                       // 获取最大宽度和对应的宽度线
-                        st = getWidth(bFeature.GetGeometryRef(), line, st);
-
-                    }
-                }
-
-                if (!isIntersect)
-                {
-                    // geos.Add(line);
-                    // length += line.Length();
+                   // geos.AddRange(getWidth(buildings, sourcePoint, receivePoint, line));
+                    geos.AddRange(a);
                 }
                 else
                 {
                     //计算绕射
-
-                    geos.AddRange(getCrossLine(st.geo, line, sourcePoint, receivePoint));
-
-
+                    // geos.Add(line);
+                    // length += line.Length();
+                    // break;
                 }
-
-
+        
             }
 
             //Console.WriteLine(length);
@@ -140,37 +110,106 @@ namespace NoiseAnalysis.ComputeTools
         }
 
 
-        public map getWidth(Geometry building, Geometry line, map mapx)
+        public List<Geometry> getWidth(Layer buildingLayer, Geometry sourcePoint, Geometry receivePoint, Geometry line)
         {
-            Geometry buildingring = building.GetGeometryRef(0);
-            map st = new map();
-        
-            Geometry intersectLine = null;
-         
-            for (int i = 0; i < buildingring.GetPointCount() - 1; i++)
+            topBuilding st = new topBuilding();
+            st.width = 0;
+            st.high = 0;
+            st.tophigh = null;
+            st.topwidth = null;
+           // buildingLayer.ResetReading();
+            Feature bFeature = null;
+            OSGeo.OGR.Envelope env = new OSGeo.OGR.Envelope();
+            while ((bFeature = buildingLayer.GetNextFeature()) != null)
             {
-                intersectLine = new Geometry(wkbGeometryType.wkbLineString);
+               
+                bFeature.GetGeometryRef().GetEnvelope(env);
+            
+                double width = Math.Sqrt((env.MaxX - env.MinX) * (env.MaxX - env.MinX) + (env.MaxY - env.MinY) * (env.MaxY - env.MinY));
 
-                intersectLine.AddPoint(buildingring.GetX(i), buildingring.GetY(i), buildingring.GetZ(i));
-                intersectLine.AddPoint(buildingring.GetX(i + 1), buildingring.GetY(i + 1), buildingring.GetZ(i + 1));
 
-                if (intersectLine.Intersect(line) && mapx.width < intersectLine.Length())
+                if (st.width < width)
                 {
-                    st.width = intersectLine.Length();
+                    st.width = width;
+                    st.topwidth = bFeature.GetGeometryRef();
+                }
 
-                    st.geo = intersectLine;
+
+                if (st.high < bFeature.GetFieldAsDouble("HEIGHT_G"))
+                {
+                    st.high = bFeature.GetFieldAsDouble("HEIGHT_G");
+                    st.tophigh = bFeature.GetGeometryRef();
                 }
             }
-      
-            if (st.geo != null)
+
+
+            List<Geometry> list = null ;
+            //list.Add(line);
+
+            
+
+            if (st.topwidth != null)
             {
-                return st;
-            }
-            else
-            {
-                return mapx;
+                list = new List<Geometry>();
+                SortedDictionary<double, Geometry> upLinePoint = new SortedDictionary<double, Geometry>();
+                SortedDictionary<double, Geometry> belowLinePoint = new SortedDictionary<double, Geometry>();
+                double k = (sourcePoint.GetY(0) - receivePoint.GetY(0)) / (sourcePoint.GetX(0) - receivePoint.GetX(0));
+                double b = sourcePoint.GetY(0) - k * sourcePoint.GetX(0);
+
+                Geometry buildingring = new Geometry(wkbGeometryType.wkbLinearRing);
+                st.topwidth.GetEnvelope(env);
+                buildingring.AddPoint(env.MinX, env.MinY, 0);
+                buildingring.AddPoint(env.MaxX, env.MinY, 0);
+
+                buildingring.AddPoint(env.MaxX, env.MaxY, 0);
+                buildingring.AddPoint(env.MinX, env.MaxY, 0);
+
+
+                for (int i = 0; i < buildingring.GetPointCount(); i++)
+                {
+                    Geometry point = GeometryCreate.createPoint3D(buildingring.GetX(i), buildingring.GetY(i), buildingring.GetZ(i));
+                    if (point.GetY(0) < k * point.GetX(0) + b)
+                    {
+                        belowLinePoint.Add(sourcePoint.Distance(point), point);
+                    }
+                    else if (buildingring.GetY(i) > k * buildingring.GetX(i) + b)
+                    {
+                        upLinePoint.Add(sourcePoint.Distance(point), point);
+                    }
+                }
+
+                Geometry uoLine = new Geometry(wkbGeometryType.wkbLineString);
+                Geometry belowLine = new Geometry(wkbGeometryType.wkbLineString);
+
+                if (upLinePoint.Count > 0)
+                {
+                    uoLine.AddPoint(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0));
+                    foreach (KeyValuePair<double, Geometry> item in upLinePoint)
+                    {
+                        uoLine.AddPoint(item.Value.GetX(0), item.Value.GetY(0), item.Value.GetZ(0));
+                    }
+                    uoLine.AddPoint(receivePoint.GetX(0), receivePoint.GetY(0), receivePoint.GetZ(0));
+                }
+
+                if (belowLinePoint.Count > 0)
+                {
+                    belowLine.AddPoint(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0));
+                    foreach (KeyValuePair<double, Geometry> item in belowLinePoint)
+                    {
+                        belowLine.AddPoint(item.Value.GetX(0), item.Value.GetY(0), item.Value.GetZ(0));
+                    }
+                    belowLine.AddPoint(receivePoint.GetX(0), receivePoint.GetY(0), receivePoint.GetZ(0));
+                }
+
+                list.Add(uoLine);
+                list.Add(belowLine);
+
             }
 
+         
+
+            return list;
+      
         }
 
 
@@ -256,6 +295,207 @@ namespace NoiseAnalysis.ComputeTools
 
             // return length;
         }
+
+
+        public List<Geometry> diffractionLine2(Layer buildingLayer, Geometry sourcePoint, Geometry receivePoint)
+        {
+
+            Geometry upLinePoint = new Geometry(wkbGeometryType.wkbMultiPoint);
+            Geometry belowLinePoint = new Geometry(wkbGeometryType.wkbMultiPoint);
+
+            double k = (sourcePoint.GetY(0) - receivePoint.GetY(0)) / (sourcePoint.GetX(0) - receivePoint.GetX(0));
+            double b = sourcePoint.GetY(0) - k * sourcePoint.GetX(0);
+
+            Feature bFeature = null;
+            Geometry uoLine = new Geometry(wkbGeometryType.wkbLineString);
+            Geometry belowLine = new Geometry(wkbGeometryType.wkbLineString);
+            uoLine.AddPoint(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0));
+            belowLine.AddPoint(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0));
+
+            Geometry point;
+
+            SortedList<double, Geometry> buildingList = new SortedList<double, Geometry>();
+            while ((bFeature = buildingLayer.GetNextFeature()) != null)
+            {
+                buildingList.Add(sourcePoint.Distance(bFeature.GetGeometryRef()), bFeature.GetGeometryRef());
+            }
+
+            foreach (KeyValuePair<double, Geometry> item in buildingList)
+            {
+                Geometry buildingring = item.Value.Boundary();
+                for (int i = 0; i < buildingring.GetPointCount() - 1; i++)
+                {
+                    Geometry pointb = GeometryCreate.createPoint3D(buildingring.GetX(i), buildingring.GetY(i), buildingring.GetZ(i));
+                    if (pointb.GetY(0) < k * pointb.GetX(0) + b)
+                    {
+                        belowLinePoint.AddGeometry(pointb);
+                    }
+                    else if (buildingring.GetY(i) > k * buildingring.GetX(i) + b)
+                    {
+                        upLinePoint.AddGeometry(pointb);
+                    }
+                }
+
+                SortedList<double, Geometry> sList = new SortedList<double, Geometry>();
+
+                if (upLinePoint.GetGeometryCount() > 1)
+                {
+
+                    point = sourcePoint;
+
+                    while (point.Distance(receivePoint) != receivePoint.Distance(upLinePoint))
+                    {
+                        sList.Clear();
+                        for (int i = 0; i < upLinePoint.GetGeometryCount(); i++)
+                        {
+                            sList.Add(point.Distance(upLinePoint.GetGeometryRef(i)), upLinePoint.GetGeometryRef(i));
+                        }
+                        if (sList.Count != 0)
+                        {
+                            upLinePoint = upLinePoint.Difference(point);
+                            point = sList.ElementAt(0).Value;
+                            uoLine.AddPoint(point.GetX(0), point.GetY(0), point.GetZ(0));
+                        }
+                        else
+                        {
+                            point = upLinePoint;
+                            uoLine.AddPoint(point.GetX(0), point.GetY(0), point.GetZ(0));
+                        }
+                    }
+
+                }
+                if (belowLinePoint.GetGeometryCount() > 1)
+                {
+
+                    point = sourcePoint;
+
+                    while (point.Distance(receivePoint) != receivePoint.Distance(belowLinePoint))
+                    {
+
+                        sList.Clear();
+                        for (int i = 0; i < belowLinePoint.GetGeometryCount(); i++)
+                        {
+                            sList.Add(point.Distance(belowLinePoint.GetGeometryRef(i)), belowLinePoint.GetGeometryRef(i));
+                        }
+
+                        if (sList.Count != 0)
+                        {
+                            point = sList.ElementAt(0).Value;
+                            belowLinePoint = belowLinePoint.Difference(point);
+                            belowLine.AddPoint(point.GetX(0), point.GetY(0), point.GetZ(0));
+                        }
+                        else
+                        {
+                            point = belowLinePoint;
+                            belowLine.AddPoint(point.GetX(0), point.GetY(0), point.GetZ(0));
+                        }
+
+                    }
+
+
+                }
+            }
+            uoLine.AddPoint(receivePoint.GetX(0), receivePoint.GetY(0), receivePoint.GetZ(0));
+            belowLine.AddPoint(receivePoint.GetX(0), receivePoint.GetY(0), receivePoint.GetZ(0));
+            List<Geometry> diffLineList = new List<Geometry>();
+            if (uoLine.GetPointCount() > 0)
+            {
+                diffLineList.Add(uoLine);
+            }
+
+            if (belowLine.GetPointCount() > 0)
+            {
+                diffLineList.Add(belowLine);
+            }
+            return diffLineList;
+
+        }
+
+        public List<Geometry> diffractionLine(Layer buildingLayer, Geometry sourcePoint, Geometry receivePoint)
+        {
+            SortedDictionary<double, Geometry> upLinePoint = new SortedDictionary<double, Geometry>();
+            SortedDictionary<double, Geometry> belowLinePoint = new SortedDictionary<double, Geometry>();
+
+            double k = (sourcePoint.GetY(0) - receivePoint.GetY(0)) / (sourcePoint.GetX(0) - receivePoint.GetX(0));
+            double b = sourcePoint.GetY(0) - k * sourcePoint.GetX(0);
+
+            Feature bFeature = null;
+            try
+            {
+                while ((bFeature = buildingLayer.GetNextFeature()) != null)
+                {
+
+                    Geometry buildingring = bFeature.GetGeometryRef().ConvexHull().GetGeometryRef(0);
+
+
+                    for (int i = 0; i < buildingring.GetPointCount() - 1; i++)
+                    {
+                        Geometry point = GeometryCreate.createPoint3D(buildingring.GetX(i), buildingring.GetY(i), buildingring.GetZ(i));
+                        if (point.GetY(0) < k * point.GetX(0) + b)
+                        {
+                            belowLinePoint.Add(sourcePoint.Distance(point), point);
+                        }
+                        else if (buildingring.GetY(i) > k * buildingring.GetX(i) + b)
+                        {
+                            upLinePoint.Add(sourcePoint.Distance(point), point);
+                        }
+                    }
+                }
+            }
+
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+
+
+            Geometry uoLine = new Geometry(wkbGeometryType.wkbLineString);
+            Geometry belowLine = new Geometry(wkbGeometryType.wkbLineString);
+
+            if (upLinePoint.Count > 0)
+            {
+                uoLine.AddPoint(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0));
+                foreach (KeyValuePair<double, Geometry> item in upLinePoint)
+                {
+                    uoLine.AddPoint(item.Value.GetX(0), item.Value.GetY(0), item.Value.GetZ(0));
+                }
+                uoLine.AddPoint(receivePoint.GetX(0), receivePoint.GetY(0), receivePoint.GetZ(0));
+            }
+
+            if (belowLinePoint.Count > 0)
+            {
+                belowLine.AddPoint(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0));
+                foreach (KeyValuePair<double, Geometry> item in belowLinePoint)
+                {
+                    belowLine.AddPoint(item.Value.GetX(0), item.Value.GetY(0), item.Value.GetZ(0));
+                }
+                belowLine.AddPoint(receivePoint.GetX(0), receivePoint.GetY(0), receivePoint.GetZ(0));
+            }
+
+
+
+            List<Geometry> diffLineList = new List<Geometry>();
+            if (uoLine.GetPointCount() > 0)
+            {
+                diffLineList.Add(uoLine);
+            }
+
+            if (belowLine.GetPointCount() > 0)
+            {
+                diffLineList.Add(belowLine);
+            }
+
+
+
+
+            return diffLineList;
+
+        }
+
+
+
+
 
 
     }
