@@ -96,9 +96,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algoriam\Angle.cs" />
+    <Compile Include="Algoriam\Line.cs" />
     <Compile Include="Analysis.cs" />
     <Compile Include="ComputeTools\PathSearch.cs" />
+    <Compile Include="ComputeTools\RoadPreprocess.cs" />
     <Compile Include="ComputeTools\SourceStrength.cs" />
+    <Compile Include="DataBase\Access.cs" />
+    <Compile Include="Preprocess\PrectionConvert.cs" />
     <Compile Include="SpatialTools\GeometryCompute.cs" />
     <Compile Include="SpatialTools\Point.cs" />
     <Compile Include="Test\Class1.cs" />
@@ -111,6 +115,7 @@
     <Compile Include="SourcePartition\PolygonPartition.cs" />
     <Compile Include="SpatialTools\GeometryCreate.cs" />
     <Compile Include="SpatialTools\ProjectionTools.cs" />
+    <Compile Include="Test\LineTest.cs" />
     <Compile Include="Test\PathSearchTest.cs" />
     <Compile Include="Test\PolygonPartitionTest.cs" />
     <Compile Include="Test\ProjectionTest.cs" />

@@ -14,7 +14,7 @@ namespace NoiseAnalysis.Test
 
 
         string rPath = Environment.CurrentDirectory + "\\temp\\receivePoint.shp";
-        string sPath = Environment.CurrentDirectory + "\\temp\\staticPartition.shp";
+        string sPath = Environment.CurrentDirectory + "\\temp\\staticPartitionx.shp";
         string bPath = Environment.CurrentDirectory + "\\temp\\union.shp";
        // string bPath = Environment.CurrentDirectory + "\\DataSource\\building.shp";
         string toPath = Environment.CurrentDirectory + "\\temp\\diffraction.shp";
@@ -66,10 +66,10 @@ namespace NoiseAnalysis.Test
 
          //   }
 
-              //  i++;
-                  //  if(i==100){
-// break;
-               //     }
+                i++;
+                    if(i==100){
+break;
+                    }
                
 
             }

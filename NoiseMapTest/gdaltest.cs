@@ -9,7 +9,8 @@ namespace NoiseMapTest
 {
     class gdaltest
     {
-        string path = "E:\\WorkSpace\\3DWorks\\NoiseAnalysis\\NoiseAnalysis\\bin\\x86\\Release";
+       static string path = "E:\\WorkSpace\\3DWorks\\NoiseAnalysis\\NoiseAnalysis\\bin\\x86\\Release";
+        string toPath = path + "\\temp\\simply.shp";
         public void geometryTest()
         {
             Gdal.AllRegister();
@@ -55,7 +56,21 @@ namespace NoiseMapTest
             String a = "";
             Geometry line = new Geometry(wkbGeometryType.wkbLineString);
             line.AddPoint(0, 0, 0);
-            line.AddPoint(3, 3, 0);
+            line.AddPoint(30, 30, 0);
+            line.ExportToWkt(out a);
+             Console.WriteLine(a);
+             line.Segmentize(4);
+
+
+             line.ExportToWkt(out a);
+             Console.WriteLine(a);
+
+
+
+
+
+
+
             Geometry plo = new Geometry(wkbGeometryType.wkbLinearRing);
 
             plo.AddPoint(1,1,0);
@@ -63,9 +78,10 @@ namespace NoiseMapTest
             plo.AddPoint(2, 2, 0);
             plo.AddPoint(2, 1, 0);
             plo.AddPoint(1, 1, 0);
+
+
             Geometry ploy = new Geometry(wkbGeometryType.wkbPolygon);
             ploy.AddGeometry(plo);
-
 
            // Geometry ploy = ploy.GetGeometryRef(0);
 
@@ -74,8 +90,8 @@ namespace NoiseMapTest
            // line.ExportToWkt(out a);
            // Console.WriteLine(a);
             Geometry lines = ploy.Intersection(line);
-
-
+    
+            
             lines.ExportToWkt(out a);
            // Console.WriteLine(a);
 
@@ -260,12 +276,118 @@ namespace NoiseMapTest
 
         }
 
+        public void getLayer()
+        {
+            Gdal.AllRegister();
+            Gdal.SetConfigOption("GDAL_FILENAME_IS_UTF8", "YES");
+            Gdal.SetConfigOption("SHAPE_ENCODING", "");
+            Ogr.RegisterAll();
+            OSGeo.OGR.Driver oDriver = Ogr.GetDriverByName("ESRI Shapefile");
+            DataSource oDS;
+            if (Ogr.Open(toPath, 0) != null)
+            {
+                oDS = Ogr.Open(toPath, 1);
+                oDS.DeleteLayer(0);
+            }
+            else
+            {
+                oDS = oDriver.CreateDataSource(toPath, null);
+            }
+
+
+            List<Geometry> geos = new List<Geometry>();
+            Geometry plo = new Geometry(wkbGeometryType.wkbLinearRing);
+
+            plo.AddPoint(10, 10, 0);
+            plo.AddPoint(10, 20, 0);
+            plo.AddPoint(20, 20, 0);
+            plo.AddPoint(20, 10, 0);
+            plo.AddPoint(10, 10, 0);
+
+
+            Geometry plos = new Geometry(wkbGeometryType.wkbLinearRing);
+
+            plos.AddPoint(12, 12, 0);
+            plos.AddPoint(12, 18, 0);
+            plos.AddPoint(18, 18, 0);
+            plos.AddPoint(18, 12, 0);
+            plos.AddPoint(12, 12, 0);
 
 
 
 
 
 
+
+
+            Geometry ploy = new Geometry(wkbGeometryType.wkbPolygon);
+            ploy.AddGeometry(plo);
+            geos.Add(ploy);
+            // ploy.Segmentize(0.1);
+            ploy.AddGeometry(plos);
+
+
+            geos.Add(ploy);
+
+            
+
+
+            Layer toLayer = oDS.CreateLayer("direct", null, wkbGeometryType.wkbPolygon, null);
+
+
+
+
+            FeatureDefn oDefn = toLayer.GetLayerDefn();
+
+            foreach (Geometry geom in geos)
+            {
+
+                Feature feature = new Feature(oDefn);
+
+                feature.SetGeometry(ploy);
+
+                toLayer.CreateFeature(feature);
+
+            }
+
+            oDS.SyncToDisk();
+
+
+        }
+
+
+
+
+        public void centreTest()
+        {
+            Gdal.AllRegister();
+            Gdal.SetConfigOption("GDAL_FILENAME_IS_UTF8", "YES");
+            Gdal.SetConfigOption("SHAPE_ENCODING", "");
+            Ogr.RegisterAll();
+
+            String a = "";
+            Geometry line = new Geometry(wkbGeometryType.wkbLineString);
+            line.AddPoint(0, 0, 0);
+            line.AddPoint(1, 1, 0);
+            line.AddPoint(2, 0, 0);
+            line.ExportToWkt(out a);
+           // Console.WriteLine(a);
+
+   
+            Geometry g = line.Centroid();
+            g.ExportToWkt(out a);
+          //  Console.WriteLine(a);
+
+
+            double d = line.GetX(line.GetPointCount()-1);
+
+            double e = line.GetY(line.GetPointCount()-1);
+            Console.WriteLine(d);
+            Console.WriteLine(e);
+
+
+
+        }
 
 
 

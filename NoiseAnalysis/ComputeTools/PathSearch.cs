@@ -84,14 +84,15 @@ namespace NoiseAnalysis.ComputeTools
 
 
 
-                List<Geometry> a = getWidth(buildings, sourcePoint, receivePoint, line);
+              //  List<Geometry> a = getWidth(buildings, sourcePoint, receivePoint, line);
 
-           
+                List<Geometry> a = diffractionLine2(buildings, sourcePoint, receivePoint, line);
                if (a!=null)
                // if (buildings.GetFeaturesRead()>0)
                 {
                    // geos.AddRange(getWidth(buildings, sourcePoint, receivePoint, line));
                     geos.AddRange(a);
+                   
                 }
                 else
                 {
@@ -100,7 +101,6 @@ namespace NoiseAnalysis.ComputeTools
                     // length += line.Length();
                     // break;
                 }
-        
             }
 
             //Console.WriteLine(length);
@@ -297,32 +297,34 @@ namespace NoiseAnalysis.ComputeTools
         }
 
 
-        public List<Geometry> diffractionLine2(Layer buildingLayer, Geometry sourcePoint, Geometry receivePoint)
+        public List<Geometry> diffractionLine2(Layer buildingLayer, Geometry sourcePoint, Geometry receivePoint, Geometry line)
         {
-
-            Geometry upLinePoint = new Geometry(wkbGeometryType.wkbMultiPoint);
-            Geometry belowLinePoint = new Geometry(wkbGeometryType.wkbMultiPoint);
-
-            double k = (sourcePoint.GetY(0) - receivePoint.GetY(0)) / (sourcePoint.GetX(0) - receivePoint.GetX(0));
-            double b = sourcePoint.GetY(0) - k * sourcePoint.GetX(0);
+             List<Geometry> diffLineList = new List<Geometry>();
+          
 
             Feature bFeature = null;
-            Geometry uoLine = new Geometry(wkbGeometryType.wkbLineString);
-            Geometry belowLine = new Geometry(wkbGeometryType.wkbLineString);
-            uoLine.AddPoint(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0));
-            belowLine.AddPoint(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0));
 
-            Geometry point;
 
-            SortedList<double, Geometry> buildingList = new SortedList<double, Geometry>();
+            List<Geometry> buildingList = new List<Geometry>();
             while ((bFeature = buildingLayer.GetNextFeature()) != null)
             {
-                buildingList.Add(sourcePoint.Distance(bFeature.GetGeometryRef()), bFeature.GetGeometryRef());
+                buildingList.Add(bFeature.GetGeometryRef());
             }
 
-            foreach (KeyValuePair<double, Geometry> item in buildingList)
+            if (buildingList.Count>0)
             {
-                Geometry buildingring = item.Value.Boundary();
+
+                  Geometry upLinePoint = new Geometry(wkbGeometryType.wkbMultiPoint);
+            Geometry belowLinePoint = new Geometry(wkbGeometryType.wkbMultiPoint);
+        
+            double k = (sourcePoint.GetY(0) - receivePoint.GetY(0)) / (sourcePoint.GetX(0) - receivePoint.GetX(0));
+            double b = sourcePoint.GetY(0) - k * sourcePoint.GetX(0);
+            Geometry upLine = new Geometry(wkbGeometryType.wkbLinearRing);
+            Geometry belowLine = new Geometry(wkbGeometryType.wkbLinearRing);
+ 
+            foreach (Geometry item in buildingList)
+            {
+                Geometry buildingring = item.Boundary();
                 for (int i = 0; i < buildingring.GetPointCount() - 1; i++)
                 {
                     Geometry pointb = GeometryCreate.createPoint3D(buildingring.GetX(i), buildingring.GetY(i), buildingring.GetZ(i));
@@ -338,74 +340,94 @@ namespace NoiseAnalysis.ComputeTools
 
                 SortedList<double, Geometry> sList = new SortedList<double, Geometry>();
 
-                if (upLinePoint.GetGeometryCount() > 1)
+                if (upLinePoint.GetGeometryCount() > 0)
                 {
+                    upLine.AddPoint(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0));
 
-                    point = sourcePoint;
-
-                    while (point.Distance(receivePoint) != receivePoint.Distance(upLinePoint))
-                    {
                         sList.Clear();
                         for (int i = 0; i < upLinePoint.GetGeometryCount(); i++)
                         {
-                            sList.Add(point.Distance(upLinePoint.GetGeometryRef(i)), upLinePoint.GetGeometryRef(i));
+                            sList.Add(sourcePoint.Distance(upLinePoint.GetGeometryRef(i)), upLinePoint.GetGeometryRef(i));
                         }
-                        if (sList.Count != 0)
+
+                        foreach (KeyValuePair<double, Geometry> items in sList)
                         {
-                            upLinePoint = upLinePoint.Difference(point);
-                            point = sList.ElementAt(0).Value;
-                            uoLine.AddPoint(point.GetX(0), point.GetY(0), point.GetZ(0));
+                            upLine.AddPoint(items.Value.GetX(0), items.Value.GetY(0), items.Value.GetZ(0));
                         }
-                        else
-                        {
-                            point = upLinePoint;
-                            uoLine.AddPoint(point.GetX(0), point.GetY(0), point.GetZ(0));
-                        }
-                    }
+
+                    upLine.AddPoint(receivePoint.GetX(0), receivePoint.GetY(0), receivePoint.GetZ(0));
+               
+                   upLine.CloseRings();
 
                 }
-                if (belowLinePoint.GetGeometryCount() > 1)
+                if (belowLinePoint.GetGeometryCount() > 0)
                 {
+                    belowLine.AddPoint(sourcePoint.GetX(0), sourcePoint.GetY(0), sourcePoint.GetZ(0));
 
-                    point = sourcePoint;
-
-                    while (point.Distance(receivePoint) != receivePoint.Distance(belowLinePoint))
-                    {
 
                         sList.Clear();
                         for (int i = 0; i < belowLinePoint.GetGeometryCount(); i++)
                         {
-                            sList.Add(point.Distance(belowLinePoint.GetGeometryRef(i)), belowLinePoint.GetGeometryRef(i));
+                            sList.Add(sourcePoint.Distance(belowLinePoint.GetGeometryRef(i)), belowLinePoint.GetGeometryRef(i));
                         }
-
-                        if (sList.Count != 0)
+                        foreach (KeyValuePair<double, Geometry> items in sList)
                         {
-                            point = sList.ElementAt(0).Value;
-                            belowLinePoint = belowLinePoint.Difference(point);
-                            belowLine.AddPoint(point.GetX(0), point.GetY(0), point.GetZ(0));
-                        }
-                        else
-                        {
-                            point = belowLinePoint;
-                            belowLine.AddPoint(point.GetX(0), point.GetY(0), point.GetZ(0));
+                            belowLine.AddPoint(items.Value.GetX(0), items.Value.GetY(0), items.Value.GetZ(0));
                         }
 
-                    }
-
+                        belowLine.AddPoint(receivePoint.GetX(0), receivePoint.GetY(0), receivePoint.GetZ(0));
+                      belowLine.CloseRings();
+                     
 
                 }
+            
             }
-            uoLine.AddPoint(receivePoint.GetX(0), receivePoint.GetY(0), receivePoint.GetZ(0));
-            belowLine.AddPoint(receivePoint.GetX(0), receivePoint.GetY(0), receivePoint.GetZ(0));
-            List<Geometry> diffLineList = new List<Geometry>();
-            if (uoLine.GetPointCount() > 0)
+          
+         
+
+
+            Geometry area;
+            Geometry diffline;
+            Geometry convexHull;
+            if (upLine.GetPointCount() > 3)
             {
-                diffLineList.Add(uoLine);
+                diffline = new Geometry(wkbGeometryType.wkbLineString);
+ area = new Geometry(wkbGeometryType.wkbPolygon);
+              
+                area.AddGeometry(upLine);
+               convexHull= area.ConvexHull().Boundary();
+                for (int i = 0; i < convexHull.GetPointCount(); i++)
+                {
+                    diffline.AddPoint(convexHull.GetX(i), convexHull.GetY(i), convexHull.GetZ(i));
+                }
+
+ 
+        
+
+                diffLineList.Add(diffline.Difference(line));
+
             }
 
-            if (belowLine.GetPointCount() > 0)
+            if (belowLine.GetPointCount() > 3)
             {
-                diffLineList.Add(belowLine);
+                area = new Geometry(wkbGeometryType.wkbPolygon);
+                area.AddGeometry(belowLine);
+                convexHull = area.ConvexHull().Boundary();
+                 diffline = new Geometry(wkbGeometryType.wkbLineString);
+
+
+                 for (int i = 0; i < convexHull.GetPointCount(); i++)
+                {
+                    diffline.AddPoint(convexHull.GetX(i), convexHull.GetY(i), convexHull.GetZ(i));
+                }
+
+
+
+
+
+                 diffLineList.Add(diffline.Difference(line));
+
+            }
             }
             return diffLineList;
 

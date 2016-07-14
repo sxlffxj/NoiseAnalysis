@@ -29,7 +29,7 @@ namespace NoiseAnalysis.Test
             Gdal.SetConfigOption("GDAL_FILENAME_IS_UTF8", "YES");
             Gdal.SetConfigOption("SHAPE_ENCODING", "");
             Ogr.RegisterAll();
-            Gdal.SetConfigOption("GDAL_DATA", "E://lib//gdal//gdal1.9//data");
+            Gdal.SetConfigOption("GDAL_DATA", Environment.CurrentDirectory+"//data");
             //读取文件
             DataSource ds = Ogr.Open(fromPath, 0);
             Layer oLayer = ds.GetLayerByIndex(0);

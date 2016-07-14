@@ -25,9 +25,11 @@ namespace NoiseAnalysis
             //PolygonPartitionTest bean = new PolygonPartitionTest();
            // bean.testPolygonPartition();
 
-            PathSearchTest bean = new PathSearchTest();
+           // PathSearchTest bean = new PathSearchTest();
 
-            bean.directTest();
+            LineTest bean = new LineTest();
+            bean.testStaticPartition();
+           // bean.directTest();
 
 
 
