@@ -74,28 +74,14 @@ namespace NoiseAnalysis.ComputeTools
 
                 while (LineSource.Count > 0)
                 {
-                  roadPoint = LineSource.Dequeue();
-
+                    roadPoint = LineSource.Dequeue();
                     Feature feature = new Feature(oDefn);
                     feature.SetGeometry(GeometryCompute.getCentre(roadPoint));
                     feature.SetField(0, height);
                     feature.SetField(1, 10*Math.Log10(Math.Pow(10, LW / 10) * roadPoint.Length()));
                     toLayer.CreateFeature(feature);
- 
-  
                 }
             }
-
-
-
-
-
-
-
-
-
-
-
         }
 
         /*!

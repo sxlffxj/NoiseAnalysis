@@ -9,15 +9,20 @@ namespace NoiseAnalysis.DataBase
 {
     class Access
     {
+        // 变量声明处
+        public OleDbConnection Conn;
+        public string ConnString = "Provider=Microsoft.Jet.OLEDB.4.0 ;Data Source=" + Environment.CurrentDirectory + "\\data\\MODEL.mdb";
 
         public OleDbConnection getConn()
         {
-            string connstr = "Provider=Microsoft.Jet.OLEDB.4.0 ;Data Source=F:\\web\\notesbook\\class\\leavenotes.mdb";
-            OleDbConnection tempconn = new OleDbConnection(connstr);
-            
-            return (tempconn);
+            Conn = new OleDbConnection(ConnString);
+            Conn.Open(); 
+            return (Conn);
         }
-
+     public void Close()   
+        {   
+            Conn.Close();   
+        }  
 
     }
 }

@@ -27,13 +27,13 @@ namespace NoiseAnalysis
 
            // PathSearchTest bean = new PathSearchTest();
 
-            LineTest bean = new LineTest();
-            bean.testStaticPartition();
+           // LineTest bean = new LineTest();
+           // bean.testStaticPartition();
            // bean.directTest();
 
+            RainwayPreprocesstest bean = new RainwayPreprocesstest();
 
-
-          
+            bean.getSpurceTest();
 
 
           //  ProjectionToolsTest bean = new ProjectionToolsTest();
