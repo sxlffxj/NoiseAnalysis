@@ -5,9 +5,9 @@ using System.Text;
 using NoiseAnalysis.DataBase;
 using System.Data.OleDb;
 
-namespace NoiseAnalysis.ComputeTools
+namespace NoiseAnalysis.Model.China.ComputeTools
 {
-    class RainwayPreprocess
+    class RainwaySource
     {
 
         public double getSpurce(String speed, String type)

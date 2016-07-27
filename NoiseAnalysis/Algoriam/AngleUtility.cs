@@ -4,10 +4,14 @@ using GeoAPI.Geometries;
 namespace NoiseAnalysis.Algorithm
 {
     
-    ///<summary>
-    /// Utility functions for working with angles.
-    /// Unless otherwise noted, methods in this class express angles in radians.
-    /// </summary>
+
+    /*!
+     * 功能 有关于角度计算的方法
+     * 版本号 1.0
+     * 作者 樊晓剑
+     * 创建时间  2016年7月27日
+     * 修改时间
+     */
     public static class AngleUtility
     {
         public const double PiTimes2 = 2.0 * System.Math.PI;

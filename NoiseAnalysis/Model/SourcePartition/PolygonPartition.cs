@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using OSGeo.OGR;
-using NoiseAnalysis.SpatialTools;
+using NoiseAnalysis.Algoriam.Spatial;
 
 
-namespace NoiseAnalysis.SourcePartition
+namespace NoiseAnalysis.Model.SourcePartition
 {
     /*!
      * 功能 分割接收点区域，生成接收点图层
@@ -15,7 +15,7 @@ namespace NoiseAnalysis.SourcePartition
      * 创建时间  2016年4月25日
      * 修改时间
      */
-    public class PolygonPartition:LayerCreate,ISourcePartition
+    public class PolygonPartition : ISourcePartition
     {
         /*!
          * 功能 根据距离分割计算区域

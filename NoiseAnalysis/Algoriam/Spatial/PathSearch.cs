@@ -5,13 +5,13 @@ using System.Text;
 using OSGeo.GDAL;
 using OSGeo.OGR;
 using OSGeo.OSR;
-using NoiseAnalysis.SpatialTools;
+using NoiseAnalysis.Algoriam.Spatial;
 using System.Xml;
 using NoiseAnalysis.Algorithm;
 using GeoAPI.Geometries;
 
 
-namespace NoiseAnalysis.ComputeTools
+namespace NoiseAnalysis.Algoriam.Spatial
 {
     class PathSearch
     {

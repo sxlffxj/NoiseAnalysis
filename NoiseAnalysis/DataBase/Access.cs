@@ -19,7 +19,7 @@ namespace NoiseAnalysis.DataBase
             Conn.Open(); 
             return (Conn);
         }
-     public void Close()   
+       public void Close()   
         {   
             Conn.Close();   
         }  

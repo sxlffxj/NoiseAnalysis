@@ -5,11 +5,18 @@ using System.Text;
 using GeoAPI.Geometries;
 using OSGeo.OGR;
 
-namespace NoiseAnalysis.SpatialTools
+namespace NoiseAnalysis.Algoriam.Spatial
 {
-   static class GeometryCreate
+    /*!
+     * 功能 集合数据构造工具
+     * 版本号 1.0
+     * 作者 樊晓剑
+     * 创建时间  2016年7月27日
+     * 修改时间
+     */
+    public static class GeometryCreate
     {
-        /**
+        /*!
          * 根据坐标构建折线
          * @date 2016年3月1日
          * @author sxlffxj
@@ -18,12 +25,12 @@ namespace NoiseAnalysis.SpatialTools
         public static Geometry createLineString3D(Coordinate p0, Coordinate p1)
         {
             Geometry geometry = new Geometry(wkbGeometryType.wkbLineString);
-            geometry.AddPoint(p0.X,p0.Y,p0.Z);
-            geometry.AddPoint(p1.X, p1.Y,p1.Z);
+            geometry.AddPoint(p0.X, p0.Y, p0.Z);
+            geometry.AddPoint(p1.X, p1.Y, p1.Z);
             return geometry;
         }
 
-        /**
+        /*!
          * 根据坐标构建折线
          * @date 2016年3月1日
          * @author sxlffxj
@@ -36,30 +43,30 @@ namespace NoiseAnalysis.SpatialTools
             geometry.AddPoint(x1, y1, z1);
             return geometry;
         }
-        /**
+        /*!
   * 根据坐标构建折线
   * @date 2016年3月1日
   * @author sxlffxj
   * @return 构造的折线
   */
-        public static Geometry createLineString(double x0, double y0,  double x1, double y1)
+        public static Geometry createLineString(double x0, double y0, double x1, double y1)
         {
             Geometry geometry = new Geometry(wkbGeometryType.wkbLineString);
             geometry.AddPoint_2D(x0, y0);
             geometry.AddPoint_2D(x1, y1);
             return geometry;
         }
-     /**
-     * 根据坐标值构建点
-     * 
-     * @date 2015年12月21日
-     * @author sxlffxj
-     * @param x
-     *            x坐标
-     * @param y
-     *            y坐标
-     * @return 点状数据
-     */
+        /*!
+        * 根据坐标值构建点
+        * 
+        * @date 2015年12月21日
+        * @author sxlffxj
+        * @param x
+        *            x坐标
+        * @param y
+        *            y坐标
+        * @return 点状数据
+        */
         public static Geometry createPoint(double x, double y)
         {
             Geometry geometry = new Geometry(wkbGeometryType.wkbPoint);
@@ -67,6 +74,15 @@ namespace NoiseAnalysis.SpatialTools
             return geometry;
         }
 
+/*!
+ * 功能 
+ * 参数 
+ * 返回值
+ * 版本号 1.0
+ * 作者 樊晓剑
+ * 创建时间  2016年7月27日
+ * 修改时间
+ */
         public static Geometry createPoint3D(double x, double y, double z)
         {
             Geometry geometry = new Geometry(wkbGeometryType.wkbPoint);

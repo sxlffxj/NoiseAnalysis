@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NoiseAnalysis.ComputeTools
+namespace NoiseAnalysis.Model.China.ComputeTools
 {
-    class SourceStrength
+   public static class SourceStrength
     {
         /*!
          * 功能 线声源源强离散计算
-         * 参数 Lpower线声源源强，lenght离散后长度
+         * 参数 
+         * Lpower 线声源源强
+         * lenght 离散后长度
          * 返回值 离散后源强
          * 版本号 1.0
          * 作者 樊晓剑
@@ -37,13 +39,6 @@ namespace NoiseAnalysis.ComputeTools
             return Math.Log10(Math.Pow(10, Lpower / 10) * lenght*lenght) * 10;
 
         }
-
-
-
-
-
-
-
 
 
 

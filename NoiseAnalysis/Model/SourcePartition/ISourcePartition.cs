@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using OSGeo.OGR;
 
-namespace NoiseAnalysis.SourcePartition
+namespace NoiseAnalysis.Model.SourcePartition
 {
     /*!
      * 功能 线声源分割接口

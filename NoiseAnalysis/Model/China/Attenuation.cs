@@ -5,7 +5,7 @@ using System.Data.OleDb;
 using System.Linq;
 using System.Text;
 
-namespace NoiseAnalysis.ComputeTools
+namespace NoiseAnalysis.Model.China.ComputeTools
 {
     /*!
      * 功能 衰减计算
@@ -14,8 +14,9 @@ namespace NoiseAnalysis.ComputeTools
      * 创建时间  2016年7月14日
      * 修改时间
      */
-    class Attenuation
+    protected class Attenuation
     {
+
 
         /*!
          * 内容 
@@ -25,7 +26,7 @@ namespace NoiseAnalysis.ComputeTools
          * 参数 distance 声源点到接收点距离
          * 修改时间
          */
-        public double geometryAttenuation(double distance)
+        protected double geometryAttenuation(double distance)
         {
             return 20 * Math.Log10(distance) + 11;
         }
@@ -39,11 +40,11 @@ namespace NoiseAnalysis.ComputeTools
          * 创建时间  2016年7月14日
          * 修改时间
          */
-        public double airAttenuation(double temperature, double humidity, double frequency)
+        protected double airAttenuation(double temperature, double humidity, double frequency)
         {
 
             double source = 0;
-            String sql = "select f" + frequency + " from 1/3ATM where T ='" + temperature + "',and HM=" + humidity+"'";
+            String sql = "select f" + frequency + " from 1/3ATM where T ='" + temperature + "',and HM=" + humidity + "'";
 
             Access access = new Access();
             OleDbConnection connection = access.getConn();
@@ -70,17 +71,17 @@ namespace NoiseAnalysis.ComputeTools
         #region 地面效应系列
 
         /*!
- * 功能 地面效应衰减简化模型,忽略地形
- * 参数 hs 声源点的高度
- *      hr接收点高度
- *      distance 距离  
- * 返回值
- * 版本号 1.0
- * 作者 樊晓剑
- * 创建时间  2016年7月14日
- * 修改时间
- */
-        public double getGroundAttenuation(double hs, double hr, double distance)
+         * 功能 地面效应衰减简化模型,忽略地形
+         * 参数 hs 声源点的高度
+         *      hr接收点高度
+         *      distance 距离  
+         * 返回值
+         * 版本号 1.0
+         * 作者 樊晓剑
+         * 创建时间  2016年7月14日
+         * 修改时间
+         */
+        protected double getGroundAttenuation(double hs, double hr, double distance)
         {
             double hm = (hs + hr) * distance / 2 / Math.Sqrt((hr - hs) * (hr - hs) - distance * distance);
 
@@ -110,15 +111,15 @@ namespace NoiseAnalysis.ComputeTools
          * 创建时间  2016年7月14日
          * 修改时间
          */
-        public double getGroundAttenuation(double hs, double hr, double frequency, double distance)
+        protected double getGroundAttenuation(double hs, double hr, double frequency, double distance)
         {
-            double gm=getGroundParam();
-            double sm=getGroundParam();
-            double rm=getGroundParam();
+            double gm = getGroundParam();
+            double sm = getGroundParam();
+            double rm = getGroundParam();
 
-            double q=getDistanceParam(hs,hr,distance);
+            double q = getDistanceParam(hs, hr, distance);
 
-            double Am=getAm(q,gm,frequency);
+            double Am = getAm(q, gm, frequency);
 
             double As = getFrequency(sm, frequency, hs, distance);
 
@@ -127,12 +128,12 @@ namespace NoiseAnalysis.ComputeTools
             return As - Ar - Am;
 
         }
-    public double getFrequency(double g, double frequency, double h, double distance)
+        protected double getFrequency(double g, double frequency, double h, double distance)
         {
             double normalFrequency = -1.5;
 
 
-            if (frequency >= 100 && frequency<=160)
+            if (frequency >= 100 && frequency <= 160)
             {
                 normalFrequency = normalFrequency + g * getHType(h, "a", distance);
             }
@@ -165,7 +166,7 @@ namespace NoiseAnalysis.ComputeTools
 
 
 
-        public double getHType(double h, String type, double d)
+        protected double getHType(double h, String type, double d)
         {
             double e = Math.E;
             switch (type)
@@ -196,7 +197,7 @@ namespace NoiseAnalysis.ComputeTools
          * 参数 
          * 修改时间
          */
-        public double getGroundParam()
+        protected double getGroundParam()
         {
 
             //计划将地面因子和影响长度存为字典或其他键值对，其中没有影响的区域按照0计算，现阶段不做
@@ -213,10 +214,10 @@ namespace NoiseAnalysis.ComputeTools
 
 
         }
-   
-        
-        
-        
+
+
+
+
         /*!
          * 功能 计算中间区域衰减
          * 参数 q 距离因子
@@ -228,7 +229,7 @@ namespace NoiseAnalysis.ComputeTools
          * 创建时间  2016年7月14日
          * 修改时间
          */
-        public double getAm(double q, double g, double frequency)
+        protected double getAm(double q, double g, double frequency)
         {
             if (frequency < 100)
             {
@@ -243,7 +244,7 @@ namespace NoiseAnalysis.ComputeTools
             }
         }
 
-        public double getDistanceParam(double hs, double hr, double dp)
+        protected double getDistanceParam(double hs, double hr, double dp)
         {
 
             if (dp <= 30 * (hr + hs))

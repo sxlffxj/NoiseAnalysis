@@ -5,10 +5,10 @@ using System.Text;
 using GeoAPI.Geometries;
 using OSGeo.OGR;
 using NoiseAnalysis.Algorithm;
-using NoiseAnalysis.SpatialTools;
+using NoiseAnalysis.Algoriam.Spatial;
 
 
-namespace NoiseAnalysis.SourcePartition
+namespace NoiseAnalysis.Model.SourcePartition
 {
     /*!
      * 功能 线声源分割
@@ -17,8 +17,17 @@ namespace NoiseAnalysis.SourcePartition
      * 创建时间  2016年4月27日
      * 修改时间
      */
-    class LineSourcePartition
+    class LineSourcePartition:ISourcePartition
     {
+
+
+
+
+
+
+
+
+        #region 静态分割
         /*!
          * 功能 普通线声源分割
          * 参数 splitLength分割因子 line 需要分割的生源线
@@ -71,8 +80,9 @@ namespace NoiseAnalysis.SourcePartition
             }
             return lineSource;
         }
+        #endregion
 
-
+        # region 动态分割尝试
         public Queue<Geometry> dynamicPartition2(Geometry roadLine, Geometry receivePoint, double param)
         {
             Queue<Geometry> roadFeature = new Queue<Geometry>();
@@ -144,10 +154,10 @@ namespace NoiseAnalysis.SourcePartition
             roadrect.AddGeometry(roadLine.Boundary());
 
 
-      
+
             int count = roadLine.GetPointCount();
             //简化声源线
-            Geometry directLine = GeometryCreate.createLineString(c, d, roadLine.GetX(count - 1), roadLine.GetY(count-1));
+            Geometry directLine = GeometryCreate.createLineString(c, d, roadLine.GetX(count - 1), roadLine.GetY(count - 1));
 
             //简化声源线参数
             double k = (roadLine.GetX(count - 1) - c) / (roadLine.GetY(count - 1) - d);
@@ -157,7 +167,7 @@ namespace NoiseAnalysis.SourcePartition
 
             Geometry sourcePoint = getSourcePoint(k, f, a, b, c, d, param);
 
-            while (roadrect.Intersects(sourcePoint)) 
+            while (roadrect.Intersects(sourcePoint))
             {
 
 
@@ -177,33 +187,33 @@ namespace NoiseAnalysis.SourcePartition
 
         }
 
-/*!
- * 功能 计算分割点
- * 版本号 1.0
- * 作者 樊晓剑
- * 创建时间  2016年7月5日
- * 参数 k,b：简化后道路线段参数，a,b：接收点参数 c,d：分割点参数 p:分割因子
- * 修改时间
- */
-        public Geometry getSourcePoint(double k,double f,double a,double b,double c,double d,double p)
+        /*!
+         * 功能 计算分割点
+         * 版本号 1.0
+         * 作者 樊晓剑
+         * 创建时间  2016年7月5日
+         * 参数 k,b：简化后道路线段参数，a,b：接收点参数 c,d：分割点参数 p:分割因子
+         * 修改时间
+         */
+        public Geometry getSourcePoint(double k, double f, double a, double b, double c, double d, double p)
         {
             p = 1 / p;
 
-            double u=(2*p*p*k*f-2*p*p*c+0/5*c+a-0.5*k*f+2*d*k+b*k)/(k*k+1)/(p*p-0.25);
+            double u = (2 * p * p * k * f - 2 * p * p * c + 0 / 5 * c + a - 0.5 * k * f + 2 * d * k + b * k) / (k * k + 1) / (p * p - 0.25);
 
             double v = p * p * c * c + p * p * f * f - 2 * d * f * p * p + d * d - 0.25 * c * c - a * c - a * a - 0.25 * f * f + 2 * d * f - d * d - b * f + b * d + b * b;
 
             double x = Math.Sqrt(Math.Abs(u * u - v)) - u;
             double y = k * x + f;
 
-            return GeometryCreate.createPoint(x,y);
+            return GeometryCreate.createPoint(x, y);
 
 
         }
 
 
 
-
+        #endregion
 
 
 

@@ -85,11 +85,11 @@ namespace NoiseAnalysis.Test
                     if (LineSource.Count > 0)
                     {
                         linex = LineSource.Dequeue();
-                        if (GeometryCompute.getCentre(line).Distance(GeometryCompute.getCentre(linex)) >= 9)
+                        if (line.Centroid().Distance(linex.Centroid()) >= 9)
                         {
 
                             Feature feature = new Feature(oDefn);
-                            feature.SetGeometry(GeometryCompute.getCentre(line));
+                            feature.SetGeometry(line.Centroid());
                             feature.SetField(0, 4.0);
                             feature.SetField(1, ran.Next(40, 120));
                             toLayer.CreateFeature(feature);
@@ -165,11 +165,11 @@ namespace NoiseAnalysis.Test
                     if (LineSource.Count > 0)
                     {
                         linex = LineSource.Dequeue();
-                        if (GeometryCompute.getCentre(line).Distance(GeometryCompute.getCentre(linex)) >= 9)
+                        if (line.Centroid().Distance(linex.Centroid()) >= 9)
                         {
 
                             Feature feature = new Feature(oDefn);
-                            feature.SetGeometry(GeometryCompute.getCentre(line));
+                            feature.SetGeometry(line.Centroid());
                             feature.SetField(0, 4.0);
                             feature.SetField(1, ran.Next(40, 120));
                             toLayer.CreateFeature(feature);
