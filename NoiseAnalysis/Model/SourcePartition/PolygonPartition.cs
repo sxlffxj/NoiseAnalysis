@@ -26,7 +26,7 @@ namespace NoiseAnalysis.Model.SourcePartition
          * 创建时间  2016年4月27日
          * 修改时间
          */
-        public Queue<Geometry> staticPartition(double distance, Geometry receiveArea, double height)
+        public static Queue<Geometry> staticPartition(double distance, Geometry receiveArea, double height)
         {
             Queue<Geometry> receivePointSource = new Queue<Geometry>();
         

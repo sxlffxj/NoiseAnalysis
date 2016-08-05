@@ -4,9 +4,16 @@ using System.Collections.Generic;
 using System.Data.OleDb;
 using System.Linq;
 using System.Text;
+using OSGeo.GDAL;
+using OSGeo.OGR;
+using OSGeo.OSR;
+using NoiseAnalysis.Algoriam.Spatial;
 
-namespace NoiseAnalysis.Model.China.ComputeTools
+namespace NoiseAnalysis.Model.China
 {
+
+
+
     /*!
      * 功能 衰减计算
      * 版本号 1.0
@@ -14,39 +21,226 @@ namespace NoiseAnalysis.Model.China.ComputeTools
      * 创建时间  2016年7月14日
      * 修改时间
      */
-    protected class Attenuation
+    class Attenuation
     {
+
+        float m_temperature;
+        float m_humidity;
+        float m_frequency;
+
+
+        /// <summary>
+        /// 初始化参数
+        /// </summary>
+        /// <param name="distance">两点距离</param>
+        /// <param name="temperature">温度</param>
+        /// <param name="humidity">湿度</param>
+        /// <param name="frequency">频率</param>
+        public Attenuation(float temperature,float humidity,float frequency)
+        {
+
+            m_temperature = temperature;
+            m_humidity = humidity;
+            m_frequency = frequency;
+        }
+
+
+        /// <summary>
+        /// 衰减计算
+        /// </summary>
+        /// <param name="LW">源强</param>
+        /// <param name="path">传播路径</param>
+        /// <returns>衰减后源强</returns>
+        public float[] getAttenuation(float LW, float[] pathList, float hr, float hs,float distance)
+        {
+            float[] attenuation = new float[5];
+
+            float though=throughAttenuation( LW,  hs, hr,distance);
+
+
+
+
+
+
+
+
+
+            //分别计算衰减
+            if (pathList[1] == null)
+            {
+                //有直射情况
+                attenuation[0] = though;
+                attenuation[1] = 0;
+                attenuation[2] = 0;
+                attenuation[3] = 0;
+                //反射
+                attenuation[4] = 2 * though;
+            }
+            else
+            {
+                //无直射情况
+                attenuation[0] = 0;
+                attenuation[1] = 0;
+                attenuation[2] = 0;
+                attenuation[3] = 0;
+                attenuation[4] = 0;
+
+            }
+
+     
+
+
+            return attenuation;
+
+        }
+
+
+
+
+
+
+
+
+
+
+
 
 
         /*!
-         * 内容 
+         * 功能 直达衰减
+         * 参数 LW 源强
+         *      distance 接收点与声源点之间的直线距离
+         *      temperature 温度
+         *      humidity 湿度
+         *      frequency 频率
+         *      hs 声源点高度
+         *      hr 接收点高度
+         * 返回值
          * 版本号 1.0
          * 作者 樊晓剑
-         * 创建时间  2016年7月14日
-         * 参数 distance 声源点到接收点距离
+         * 创建时间  2016年7月27日
          * 修改时间
          */
-        protected double geometryAttenuation(double distance)
+        private float throughAttenuation(float LW, float hs, float hr,float distance)
         {
-            return 20 * Math.Log10(distance) + 11;
+
+            //几何衰减
+            float Adiv = getGeometryAttenuation(distance);
+
+            //地面衰减
+            float Agr = getGroundAttenuation(hs, hr, distance);
+
+            //大气衰减
+            float Aatm = getAirAttenuation(m_temperature, m_humidity, m_frequency);
+
+
+            return LW - Adiv - Aatm - Agr-11;
+
+
+        }
+
+        /// <summary>
+        /// 绕射衰减
+        /// </summary>
+        /// <param name="flankLine">绕射路径</param>
+        /// <param name="flankType">绕射类型</param>
+        /// <param name="distance">直线距离</param>
+        /// <returns></returns>
+        private float flankAttenuation(Geometry flankLine,bool flankType,float distance)
+        {
+          //  D_(z,i)=10lg[3+(C_2⁄λ) C_3 zK_met]
+
+            float flank = 0;//绕射衰减
+
+            //参数
+            float C2 = 20;
+            float C3 = 0;
+
+            float z = 0;//声程差
+            float Kmet = 0;//参数
+            float wavelength = 340 / m_frequency;//波长
+
+
+            double[] point0=new double[3];
+            double[] point1=new double[3];
+            double[] point2=new double[3];
+            double[] point3 =new double[3];
+            flankLine.GetPoint(0, point0);
+            flankLine.GetPoint(1, point1);
+            flankLine.GetPoint(flankLine.GetPointCount() - 2, point2);
+            flankLine.GetPoint(flankLine.GetPointCount()-1, point3);
+
+            float dss=(float)Distance3D.getPointDistance(point0,point1);
+            float e=(float)Distance3D.getPointDistance(point2,point1);
+            float dst=(float)Distance3D.getPointDistance(point3,point2);
+            float d = (float)Distance3D.getPointDistance(point3, point0);
+
+            if(flankType){
+                C3 = 1;
+                z = (float)Math.Sqrt((dss + dst) * (dss + dst) + distance * distance) - d;
+            }
+            else
+            {
+                C3=(1+(5*wavelength/e)*(5*wavelength/e))/(1/3+(5*wavelength/e)*(5*wavelength/e));
+                z = (float)Math.Sqrt((dss + dst + e) * (dss + dst + e) + distance * distance) - d;
+
+            }
+            Kmet = z <= 0 ? 1 : (float)Math.Pow(e, -(1 / 2000) * Math.Sqrt(dss * dst * d / 2 / z));
+            flank = 10 * (float)Math.Log10(3 + (C2 / wavelength) * C3 * z * Kmet);
+            return flank;
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /*!
+         * 功能 计算几何衰减
+         * 参数 distance 声源点与接收点距离
+         * 返回值 几何衰减值
+         * 作者 樊晓剑
+         * 创建时间  2016年7月27日
+         * 修改时间
+         */
+        private float getGeometryAttenuation(float distance)
+        {
+            return 20 * (float)Math.Log10(distance) + 11;
         }
 
         /*!
          * 功能 空气效应衰减
-         * 参数 
-         * 返回值
+         * 参数 temperature 温度
+         *      humidity 湿度
+         *      frequency 频率
+         * 返回值 空气效应衰减值
          * 版本号 1.0
          * 作者 樊晓剑
          * 创建时间  2016年7月14日
          * 修改时间
          */
-        protected double airAttenuation(double temperature, double humidity, double frequency)
+        private float getAirAttenuation(float temperature, float humidity, float frequency)
         {
 
-            double source = 0;
+            float source = 0;
             String sql = "select f" + frequency + " from 1/3ATM where T ='" + temperature + "',and HM=" + humidity + "'";
 
-            Access access = new Access();
+            NoiseAnalysis.DataBase.Access access = new NoiseAnalysis.DataBase.Access();
             OleDbConnection connection = access.getConn();
 
 
@@ -54,16 +248,13 @@ namespace NoiseAnalysis.Model.China.ComputeTools
             OleDbDataReader reader = command.ExecuteReader(); //执行command并得到相应的DataReader
             while (reader.Read())
             {
-                source = Convert.ToDouble(reader["v" + frequency]);
+                source = (float)(reader["v" + frequency]);
 
             }
             reader.Close();
             access.Close();
 
-
             return source;
-
-
         }
 
 
@@ -81,16 +272,16 @@ namespace NoiseAnalysis.Model.China.ComputeTools
          * 创建时间  2016年7月14日
          * 修改时间
          */
-        protected double getGroundAttenuation(double hs, double hr, double distance)
+        private float getGroundAttenuation(float hs, float hr, float distance)
         {
-            double hm = (hs + hr) * distance / 2 / Math.Sqrt((hr - hs) * (hr - hs) - distance * distance);
+            double hm = ((hs + hr) * distance / 2 / Math.Sqrt((hr - hs) * (hr - hs) - distance * distance));
 
 
-            double agr = 4.8 - (2 * hm / distance) * (17 + 300 / distance);
+            double agr = 4.8 - ((2 * hm / distance) * (17 + 300 / distance));
 
             if (agr >= 0)
             {
-                return agr;
+                return (float)agr;
             }
             else
             {
@@ -111,26 +302,26 @@ namespace NoiseAnalysis.Model.China.ComputeTools
          * 创建时间  2016年7月14日
          * 修改时间
          */
-        protected double getGroundAttenuation(double hs, double hr, double frequency, double distance)
+        private float getGroundAttenuation(float hs, float hr, float frequency, float distance)
         {
-            double gm = getGroundParam();
-            double sm = getGroundParam();
-            double rm = getGroundParam();
+            float gm = getGroundParam();
+            float sm = getGroundParam();
+            float rm = getGroundParam();
 
-            double q = getDistanceParam(hs, hr, distance);
+            float q = getDistanceParam(hs, hr, distance);
 
-            double Am = getAm(q, gm, frequency);
+            float Am = getAm(q, gm, frequency);
 
-            double As = getFrequency(sm, frequency, hs, distance);
+            float As = getFrequency(sm, frequency, hs, distance);
 
-            double Ar = getFrequency(rm, frequency, hr, distance);
+            float Ar = getFrequency(rm, frequency, hr, distance);
 
             return As - Ar - Am;
 
         }
-        protected double getFrequency(double g, double frequency, double h, double distance)
+        private float getFrequency(float g, float frequency, float h, float distance)
         {
-            double normalFrequency = -1.5;
+            double normalFrequency = -1.5f;
 
 
             if (frequency >= 100 && frequency <= 160)
@@ -158,7 +349,7 @@ namespace NoiseAnalysis.Model.China.ComputeTools
             }
 
 
-            return normalFrequency;
+            return (float)normalFrequency;
 
         }
 
@@ -166,7 +357,7 @@ namespace NoiseAnalysis.Model.China.ComputeTools
 
 
 
-        protected double getHType(double h, String type, double d)
+        private double getHType(float h, String type, float d)
         {
             double e = Math.E;
             switch (type)
@@ -197,7 +388,7 @@ namespace NoiseAnalysis.Model.China.ComputeTools
          * 参数 
          * 修改时间
          */
-        protected double getGroundParam()
+        private float getGroundParam()
         {
 
             //计划将地面因子和影响长度存为字典或其他键值对，其中没有影响的区域按照0计算，现阶段不做
@@ -229,7 +420,7 @@ namespace NoiseAnalysis.Model.China.ComputeTools
          * 创建时间  2016年7月14日
          * 修改时间
          */
-        protected double getAm(double q, double g, double frequency)
+        private float getAm(float q, float g, float frequency)
         {
             if (frequency < 100)
             {
@@ -244,7 +435,7 @@ namespace NoiseAnalysis.Model.China.ComputeTools
             }
         }
 
-        protected double getDistanceParam(double hs, double hr, double dp)
+        private float getDistanceParam(float hs, float hr, float dp)
         {
 
             if (dp <= 30 * (hr + hs))

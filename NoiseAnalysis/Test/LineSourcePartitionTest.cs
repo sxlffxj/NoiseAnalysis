@@ -1,5 +1,4 @@
-﻿using NoiseAnalysis.SourcePartition;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +7,8 @@ using OSGeo.GDAL;
 using OSGeo.OGR;
 using OSGeo.OSR;
 using System.Collections;
-using NoiseAnalysis.SpatialTools;
+using NoiseAnalysis.Model.SourcePartition;
+
 
 
 

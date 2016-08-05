@@ -96,13 +96,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algoriam\AngleUtility.cs" />
+    <Compile Include="Algoriam\Spatial\Distance3D.cs" />
     <Compile Include="Algoriam\Spatial\LineUtility.cs" />
     <Compile Include="Model\China\Attenuation.cs" />
     <Compile Include="Algoriam\Spatial\PathSearch.cs" />
+    <Compile Include="Model\China\ChinaModel.cs" />
+    <Compile Include="Model\China\ISource.cs" />
     <Compile Include="Model\China\RainwaySource.cs" />
     <Compile Include="Model\China\RoadSource.cs" />
     <Compile Include="Model\China\SourceStrength.cs" />
     <Compile Include="DataBase\Access.cs" />
+    <Compile Include="Model\China\SubwaySource.cs" />
     <Compile Include="Test\Class1.cs" />
     <Compile Include="Test\LineSourcePartitionTest.cs" />
     <Compile Include="Model\SourcePartition\ISourcePartition.cs" />

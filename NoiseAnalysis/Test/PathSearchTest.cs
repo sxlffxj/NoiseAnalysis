@@ -1,11 +1,11 @@
-﻿using NoiseAnalysis.ComputeTools;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using OSGeo.GDAL;
 using OSGeo.OGR;
 using OSGeo.OSR;
+using NoiseAnalysis.Algoriam.Spatial;
 
 namespace NoiseAnalysis.Test
 {
@@ -60,7 +60,7 @@ namespace NoiseAnalysis.Test
 
 
 
-                geos.AddRange(bean.direct(bLayer, sLayer, point,500));
+              //  geos.AddRange(bean.direct(bLayer, sLayer, point,500));
 
                 Console.WriteLine(rFeature.GetFID() + ":" + rLayer.GetFeatureCount(0) + ":" + DateTime.Now + ":" + DateTime.Now.Millisecond);
 

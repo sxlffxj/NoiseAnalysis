@@ -11,7 +11,7 @@ using NoiseAnalysis.Algoriam.Spatial;
 using NoiseAnalysis.Algorithm;
 using NoiseAnalysis.Model.SourcePartition;
 
-namespace NoiseAnalysis.Model.China.ComputeTools
+namespace NoiseAnalysis.Model.China
 {
     /*!
      * 功能 道路声源模型
@@ -20,7 +20,7 @@ namespace NoiseAnalysis.Model.China.ComputeTools
      * 创建时间  2016年7月27日
      * 修改时间
      */
-    internal class RoadSourrce
+    internal class RoadSourrce:ISource
     {
         /*!
          * 功能 计算路面声压级并离散
@@ -34,38 +34,9 @@ namespace NoiseAnalysis.Model.China.ComputeTools
          * 创建时间  2016年7月12日
          * 修改时间
          */
-        public void getRoadSource(String sourcePath, String resultPath, float splitLength, String timeType)
+        public Layer getSource(Layer sourceLayer, Layer resultLayer, float splitLength, String timeType, int frequency)
         {
-
             LineSourcePartition bean = new LineSourcePartition();
-            resultPath = resultPath + "\\RoadSourceTemp.shp";//输出路径
-            //源文件
-            DataSource sourceDataSource = Ogr.Open(sourcePath, 0);
-            Layer sourceLayer = sourceDataSource.GetLayerByIndex(0);
-            // 写入文件
-            OSGeo.OGR.Driver resultDriver = Ogr.GetDriverByName("ESRI Shapefile");
-
-            // 创建数据源  
-
-            DataSource resultDataSource;
-            if (Ogr.Open(resultPath, 0) != null)
-            {
-                resultDataSource = Ogr.Open(resultPath, 1);
-                resultDataSource.DeleteLayer(0);
-            }
-            else
-            {
-                resultDataSource = resultDriver.CreateDataSource(resultPath, null);
-            }
-
-            //构建声源点图层
-            Layer resultLayer = resultDataSource.CreateLayer("POINT", sourceLayer.GetSpatialRef(), wkbGeometryType.wkbPoint, null);
-            //构建属性
-            resultLayer.CreateField(new FieldDefn("HEIGHT_G", FieldType.OFTReal), 1);//高度
-            resultLayer.CreateField(new FieldDefn("PWLs", FieldType.OFTReal), 1);//单一频率声功率级
-
-
-
             FeatureDefn resultDefn = sourceLayer.GetLayerDefn();//字段名
 
             Feature resultFeature = null;//循环获取要素
@@ -86,14 +57,19 @@ namespace NoiseAnalysis.Model.China.ComputeTools
                     roadPoint = LineSource.Dequeue();
                     Feature feature = new Feature(resultDefn);
                     feature.SetGeometry(roadPoint.Centroid());
-                    feature.SetField(0, height);
-                    feature.SetField(1, 10 * Math.Log10(Math.Pow(10, LW / 10) * roadPoint.Length()));//离散后声功率级
+                    feature.SetField("HEIGHT_G", height);
+                    feature.SetField("PWLs", SourceStrength.getLineSource(LW, roadPoint.Length()));//离散后声功率级
+                    feature.SetField("FREQUENCY", frequency);//频率
+
                     resultLayer.CreateFeature(feature);
                 }
             }
+            
+            return resultLayer;
+
         }
 
-
+        #region 内部方法
 
         /*!
          * 内容 计算车速
@@ -293,6 +269,7 @@ namespace NoiseAnalysis.Model.China.ComputeTools
             return LW;
         }
 
+        #endregion
         #region 未使用代码
 
         /*!

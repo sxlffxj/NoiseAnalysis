@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NoiseAnalysis.Model.China.ComputeTools
+namespace NoiseAnalysis.Model.China
 {
-   public static class SourceStrength
+    internal static class SourceStrength
     {
         /*!
          * 功能 线声源源强离散计算
@@ -18,7 +18,7 @@ namespace NoiseAnalysis.Model.China.ComputeTools
          * 创建时间  2016年5月10日
          * 修改时间
          */
-        public double getLineSource(double Lpower,double lenght)
+        public static double getLineSource(double Lpower,double lenght)
         {
             return Math.Log10(Math.Pow(10, Lpower / 10) * lenght) * 10;
 
@@ -33,7 +33,7 @@ namespace NoiseAnalysis.Model.China.ComputeTools
          * 创建时间  2016年5月10日
          * 修改时间
          */
-        public double getPolygonSource(double Lpower, double lenght)
+        public static double getPolygonSource(double Lpower, double lenght)
         {
 
             return Math.Log10(Math.Pow(10, Lpower / 10) * lenght*lenght) * 10;
